@@ -153,7 +153,7 @@ function render(){
  });
  h+='<div class="total"><span>Available to use'+(unknown?' (not counting ones not checked)':'')+'</span><span class="res">'+money(avail)+'</span></div></section>';
  h+='<div class="tools">';
- if(!LOCKED||KEY)h+='<button class="wide" id="mklock">🔒 Make a locked copy for GitHub</button>';
+ if(!LOCKED)h+='<button class="wide" id="mklock">🔒 Make a locked copy for GitHub</button>';
  if(LOCKED)h+='<button class="wide" id="logout">Lock this app on this device</button>';
  h+='</div>';
  app.innerHTML=h;
