@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#2b5a8a">
 <title>My Money</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <style id="appstyle">
 :root{--bg:#f6f4ef;--card:#fff;--ink:#1d2321;--muted:#5f6763;--line:#e3e0d8;--in:#1f7a4d;--out:#b3402f;--accent:#2b5a8a;--soft:#eef3f8;--res:#6a4c9c}
 html{color-scheme:light}
@@ -204,7 +207,7 @@ dlg.addEventListener('close',function(){delArmed=null;document.getElementById('f
 document.getElementById('fcancel').addEventListener('click',function(){dlg.close();});
 function flash(msg){var s=document.getElementById('status');s.textContent=msg;s.classList.add('show');setTimeout(function(){s.classList.remove('show');},2000);}
 function buildDoc(dataText,lockedText){
- var parts=['<!DOCTYPE html>\n<html lang="en-GB">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="theme-color" content="#2b5a8a">\n<title>My Money</title>\n',
+ var parts=['<!DOCTYPE html>\n<html lang="en-GB">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="theme-color" content="#2b5a8a">\n<title>My Money</title>\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="icon" href="icons/icon-192.png">\n<link rel="apple-touch-icon" href="icons/icon-192.png">\n',
  document.getElementById('appstyle').outerHTML,'\n</head>\n<body>\n<script id="data" type="application/json">',dataText,'</scr'+'ipt>\n<script id="locked" type="application/json">',lockedText,'</scr'+'ipt>\n<main id="app"></main>\n',
  dlg.outerHTML.replace(/ open=""/,''),'\n',lockdlg.outerHTML.replace(/ open=""/,''),'\n<div id="status"></div>\n<script id="appcode">',document.getElementById('appcode').textContent,'</scr'+'ipt>\n</body>\n</html>\n'];
  return parts.join('');
@@ -267,6 +270,7 @@ function showLock(msg){
  });
 }
 function startLocked(){
+ try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}
  if(!window.crypto||!crypto.subtle){app.innerHTML='<div class="lock"><h1>My Money</h1><p>This browser can\'t open the locked app. Please open it in Chrome.</p></div>';return;}
  var saved=null;try{saved=localStorage.getItem('mm-key');}catch(e){}
  if(!saved)return showLock();
