@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2b5a8a">
+<title>My Money</title>
+<style id="appstyle">
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1d2321;--muted:#5f6763;--line:#e3e0d8;--in:#1f7a4d;--out:#b3402f;--accent:#2b5a8a;--soft:#eef3f8;--res:#6a4c9c}
+html{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:26px;margin:4px 0 2px}
+.sub{color:var(--muted);margin:0 0 18px;font-size:15px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.tile .lbl{font-size:14px;color:var(--muted)}
+.tile .num{font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.in{color:var(--in)}.out{color:var(--out)}.res{color:var(--res)}
+.note{background:var(--soft);border-radius:12px;padding:12px 14px;margin-bottom:22px;font-size:15px}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 14px 14px;margin-bottom:18px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0}
+.head h2{font-size:20px;margin:0}.head button{white-space:nowrap;flex:none}
+.explain{color:var(--muted);font-size:14px;margin:-4px 0 6px}
+.row{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.row input[type=checkbox]{width:24px;height:24px;flex:none;accent-color:var(--in)}
+.name{flex:1;min-width:0}
+.name b{display:block;font-weight:600;overflow-wrap:anywhere}
+.name small{color:var(--muted);font-size:14px}
+.amt{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.paid .name b,.paid .amt{text-decoration:line-through;color:var(--muted)}
+button{font:inherit;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;cursor:pointer}
+button.main{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.edit{padding:6px 10px;font-size:15px}
+button.del{color:var(--out)}
+button.wide{width:100%;padding:12px}
+.total{display:flex;justify-content:space-between;padding-top:12px;border-top:2px solid var(--line);font-weight:700}
+.grp{display:flex;justify-content:space-between;font-size:16px;margin:16px 0 0;padding-bottom:6px;color:var(--accent)}.grp span{color:var(--muted);font-weight:400;font-size:14px}
+.empty{color:var(--muted);padding:12px 0;border-top:1px solid var(--line)}
+.tools{display:grid;gap:10px;margin-top:8px}
+dialog{border:none;border-radius:16px;padding:0;width:min(440px,94vw);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+form{padding:20px}
+form h3{margin:0 0 14px;font-size:20px}
+form p{margin:0 0 6px;font-size:15px;color:var(--muted)}
+label{display:block;font-size:15px;color:var(--muted);margin:12px 0 4px}
+input[type=text],input[type=number],input[type=password],select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.btns{display:flex;gap:8px;justify-content:space-between;margin-top:20px;flex-wrap:wrap}
+.btns .right{display:flex;gap:8px;margin-left:auto}
+.err{color:var(--out);font-weight:600;font-size:15px;margin-top:10px}
+.lock{max-width:400px;margin:12vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 22px}
+.lock h1{margin:0 0 6px}.lock p{color:var(--muted);margin:0 0 6px;font-size:16px}
+.lock button{width:100%;margin-top:16px;padding:12px}
+#status{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:20px;font-size:15px;opacity:0;transition:opacity .3s;pointer-events:none}
+#status.show{opacity:1}
+@media (max-width:520px){.summary{grid-template-columns:1fr}.tile .num{font-size:26px}}
+</style>
+</head>
+<body>
+<script id="data" type="application/json">null</script>
+<script id="locked" type="application/json">{"v":1,"iv":"2zlSWj3HsEP5+Gpk","ct":"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"}</script>
+<main id="app"></main>
+<dialog id="dlg"><form id="frm" method="dialog">
+<h3 id="ftitle">Change a bill</h3>
+<label for="fname">Name</label><input id="fname" type="text" required="">
+<div id="fmoney" style="display: block;">
+<label for="famt">Amount (£)</label><input id="famt" type="number" step="0.01" min="0" inputmode="decimal">
+<label for="ffreq">How often</label>
+<select id="ffreq"><option value="monthly">Every month</option><option value="4weekly">Every 4 weeks</option><option value="weekly">Every week</option><option value="yearly">Once a year</option></select>
+<div id="fgroupwrap" style="display: block;"><label for="fgroup">Type of bill</label><select id="fgroup"><option value="home">Home</option><option value="insurance">Insurance</option><option value="other">Other bills and subscriptions</option></select></div>
+<label for="fday">Day of the month it goes out or comes in (you can leave this blank)</label><input id="fday" type="number" min="1" max="31" inputmode="numeric">
+</div>
+<div id="freserve" style="display: none;">
+<label for="flimit">Credit limit (£)</label><input id="flimit" type="number" step="0.01" min="0" inputmode="decimal">
+<label for="favail">Available to spend right now (£) – leave blank if you don't know</label><input id="favail" type="number" step="0.01" min="0" inputmode="decimal">
+</div>
+<label for="fnote">Note (you can leave this blank)</label><input id="fnote" type="text">
+<div class="btns"><button type="button" class="del" id="fdel" style="visibility: visible;">Delete</button><div class="right"><button type="button" id="fcancel">Cancel</button><button type="submit" class="main">Save</button></div></div>
+</form></dialog>
+<dialog id="lockdlg"><form id="lockfrm" method="dialog">
+<h3>Make a locked copy</h3>
+<p>This makes an <b>index.html</b> file for GitHub. Nobody can see your money in it without the password.</p>
+<label for="lp1">Password</label><input id="lp1" type="password" autocomplete="new-password">
+<label for="lp2">Type it again</label><input id="lp2" type="password" autocomplete="new-password">
+<div class="err" id="lockerr" hidden=""></div>
+<div class="btns"><div class="right"><button type="button" id="lockcancel">Cancel</button><button type="submit" class="main" id="lockgo" disabled="">Locking…</button></div></div>
+</form></dialog>
+<div id="status"></div>
+<script id="appcode">
+(function(){
+var SALT='947e56501b15cf548106eda376e6c5da',ITER=310000;
+var app=document.getElementById('app'),dlg=document.getElementById('dlg'),lockdlg=document.getElementById('lockdlg');
+var state=null,editing=null,artifact=null,downloads=null,saveTimer=null,KEY=null;
+var lockedBlob=null;
+try{var lt=document.getElementById('locked').textContent.trim();if(lt)lockedBlob=JSON.parse(lt);}catch(e){}
+var LOCKED=!!lockedBlob;
+var FREQ={monthly:'every month','4weekly':'every 4 weeks',weekly:'every week',yearly:'once a year'};
+function perMonth(x){var a=+x.amount||0;return x.freq==='weekly'?a*52/12:x.freq==='4weekly'?a*13/12:x.freq==='yearly'?a/12:a;}
+function money(n){return (n<0?'-':'')+'£'+Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function sum(list){return list.reduce(function(t,x){return t+perMonth(x);},0);}
+function suffix(d){d=+d;if(d>3&&d<21)return'th';return['th','st','nd','rd'][d%10]||'th';}
+function sub(x){var s=FREQ[x.freq]||'';if(x.freq!=='monthly')s+=' (about '+money(perMonth(x))+' a month)';if(x.day)s+=' · on the '+x.day+suffix(x.day);if(x.note)s+=' · '+esc(x.note);return s;}
+function isNum(v){return v!==null&&v!==''&&v!==undefined&&!isNaN(+v);}
+// ---------- crypto ----------
+var hex=function(h){return new Uint8Array(h.match(/../g).map(function(x){return parseInt(x,16);}));};
+function b64(a){var s='',u=new Uint8Array(a);for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s);}
+function unb64(s){return Uint8Array.from(atob(s),function(c){return c.charCodeAt(0);});}
+function derive(pw){return crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']).then(function(base){return crypto.subtle.deriveKey({name:'PBKDF2',salt:hex(SALT),iterations:ITER,hash:'SHA-256'},base,{name:'AES-GCM',length:256},true,['encrypt','decrypt']);});}
+function seal(key,obj){var iv=crypto.getRandomValues(new Uint8Array(12));return crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,new TextEncoder().encode(JSON.stringify(obj))).then(function(ct){return{v:1,iv:b64(iv),ct:b64(ct)};});}
+function unseal(key,blob){return crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(blob.iv)},key,unb64(blob.ct)).then(function(pt){return JSON.parse(new TextDecoder().decode(pt));});}
+// ---------- normal app ----------
+function fixMonth(){var m=new Date().toISOString().slice(0,7);if(state.paidMonth!==m){state.paid=[];state.paidMonth=m;}if(!state.reserve)state.reserve=[];}
+function render(){
+ var inc=sum(state.income),out=sum(state.bills),left=inc-out;
+ var toCome=state.bills.filter(function(b){return state.paid.indexOf(b.id)<0;}).reduce(function(t,b){return t+perMonth(b);},0);
+ var monthName=new Date().toLocaleDateString('en-GB',{month:'long'});
+ var bills=state.bills.slice().sort(function(a,b){return perMonth(b)-perMonth(a);});
+ var h='<h1>My Money</h1><p class="sub">Tap <b>Change</b> to edit anything. It saves by itself.</p>';
+ h+='<div class="summary"><div class="tile"><div class="lbl">Coming in a month</div><div class="num in">'+money(inc)+'</div></div>';
+ h+='<div class="tile"><div class="lbl">Bills a month</div><div class="num out">'+money(out)+'</div></div>';
+ h+='<div class="tile"><div class="lbl">Left after bills</div><div class="num '+(left<0?'out':'')+'">'+money(left)+'</div></div></div>';
+ h+='<div class="note">Bills <b>still to go out in '+monthName+'</b>: <b>'+money(toCome)+'</b>. Tick a bill when it\'s gone out. The ticks clear by themselves on the 1st of each month.</div>';
+ h+='<section><div class="head"><h2>Money coming in</h2><button class="main" data-add="income">+ Add</button></div>';
+ if(!state.income.length)h+='<div class="empty">Nothing added yet.</div>';
+ state.income.forEach(function(x){h+='<div class="row"><div class="name"><b>'+esc(x.name)+'</b><small>'+sub(x)+'</small></div><span class="amt in">'+money(+x.amount)+'</span><button class="edit" data-edit="income:'+x.id+'">Change</button></div>';});
+ h+='<div class="total"><span>Total a month</span><span class="in">'+money(inc)+'</span></div></section>';
+ h+='<section><div class="head"><h2>Bills going out</h2><button class="main" data-add="bills">+ Add</button></div>';
+ if(!bills.length)h+='<div class="empty">No bills added yet.</div>';
+ [['home','Home'],['insurance','Insurance'],['other','Other bills and subscriptions']].forEach(function(g){
+  var gb=bills.filter(function(x){return (x.group||'other')===g[0];});if(!gb.length)return;
+  h+='<h3 class="grp">'+g[1]+' <span>'+money(sum(gb))+' a month</span></h3>';
+  gb.forEach(function(x){var p=state.paid.indexOf(x.id)>=0;h+='<div class="row'+(p?' paid':'')+'"><input type="checkbox" aria-label="Gone out this month" data-tick="'+x.id+'"'+(p?' checked':'')+'><div class="name"><b>'+esc(x.name)+'</b><small>'+sub(x)+'</small></div><span class="amt out">'+money(+x.amount)+(x.freq==='yearly'?'/yr':'')+'</span><button class="edit" data-edit="bills:'+x.id+'">Change</button></div>';});
+ });
+ h+='<div class="total"><span>Total a month</span><span class="out">'+money(out)+'</span></div></section>';
+ var avail=0,unknown=0;
+ h+='<section><div class="head"><h2>Reserve &amp; emergency money</h2><button class="main" data-add="reserve">+ Add</button></div>';
+ h+='<p class="explain">Only for emergencies. This is credit, so it has to be paid back. It isn\'t counted in your totals above.</p>';
+ if(!state.reserve.length)h+='<div class="empty">Nothing added yet.</div>';
+ state.reserve.forEach(function(x){
+  var known=isNum(x.available);if(known)avail+=+x.available;else unknown++;
+  var s='Limit '+money(+x.limit||0);if(x.note)s+=' · '+esc(x.note);
+  h+='<div class="row"><div class="name"><b>'+esc(x.name)+'</b><small>'+s+'</small></div><span class="amt res">'+(known?money(+x.available):'Not checked')+'</span><button class="edit" data-edit="reserve:'+x.id+'">Change</button></div>';
+ });
+ h+='<div class="total"><span>Available to use'+(unknown?' (not counting ones not checked)':'')+'</span><span class="res">'+money(avail)+'</span></div></section>';
+ h+='<div class="tools">';
+ if(!LOCKED||KEY)h+='<button class="wide" id="mklock">🔒 Make a locked copy for GitHub</button>';
+ if(LOCKED)h+='<button class="wide" id="logout">Lock this app on this device</button>';
+ h+='</div>';
+ app.innerHTML=h;
+ var mk=document.getElementById('mklock');if(mk)mk.onclick=openLock;
+ var lo=document.getElementById('logout');if(lo)lo.onclick=function(){try{localStorage.removeItem('mm-key');}catch(e){}location.reload();};
+}
+function show(id,on){document.getElementById(id).style.display=on?'block':'none';}
+function open(list,id){
+ var x=id?state[list].filter(function(i){return i.id===id;})[0]:null;
+ editing={list:list,id:id};
+ var what=list==='income'?'money coming in':list==='bills'?'a bill':'emergency money';
+ document.getElementById('ftitle').textContent=(x?'Change ':'Add ')+what;
+ document.getElementById('fname').value=x?x.name:'';
+ document.getElementById('fnote').value=x&&x.note?x.note:'';
+ show('fmoney',list!=='reserve');show('freserve',list==='reserve');show('fgroupwrap',list==='bills');
+ if(list==='reserve'){document.getElementById('flimit').value=x?x.limit:'';document.getElementById('favail').value=x&&isNum(x.available)?x.available:'';}
+ else{document.getElementById('famt').value=x?x.amount:'';document.getElementById('ffreq').value=x?x.freq:'monthly';document.getElementById('fday').value=x?x.day:'';document.getElementById('fgroup').value=x&&x.group?x.group:'other';}
+ document.getElementById('fdel').style.visibility=x?'visible':'hidden';
+ dlg.showModal();
+}
+app.addEventListener('click',function(e){
+ var t=e.target;
+ if(t.dataset.add)open(t.dataset.add,null);
+ if(t.dataset.edit){var p=t.dataset.edit.split(':');open(p[0],p[1]);}
+});
+app.addEventListener('change',function(e){
+ var id=e.target.dataset.tick;if(!id)return;
+ var i=state.paid.indexOf(id);if(e.target.checked&&i<0)state.paid.push(id);if(!e.target.checked&&i>=0)state.paid.splice(i,1);
+ render();save();
+});
+function r2(v){return Math.round(parseFloat(v)*100)/100;}
+document.getElementById('frm').addEventListener('submit',function(e){
+ e.preventDefault();
+ var L=editing.list,item={name:document.getElementById('fname').value.trim(),note:document.getElementById('fnote').value.trim()};
+ if(!item.name)return;
+ if(L==='reserve'){item.limit=r2(document.getElementById('flimit').value)||0;var av=document.getElementById('favail').value;item.available=av===''?null:r2(av);}
+ else{item.amount=r2(document.getElementById('famt').value);if(isNaN(item.amount))return;item.freq=document.getElementById('ffreq').value;item.day=document.getElementById('fday').value;if(L==='bills')item.group=document.getElementById('fgroup').value;}
+ var list=state[L];
+ if(editing.id){list.forEach(function(x,i){if(x.id===editing.id){item.id=x.id;list[i]=item;}});}
+ else{item.id=L.charAt(0)+Date.now();list.push(item);}
+ dlg.close();render();save();
+});
+var delArmed=null;
+document.getElementById('fdel').addEventListener('click',function(){
+ var b=this;if(delArmed!==editing.id){delArmed=editing.id;b.textContent='Tap again to delete';return;}
+ state[editing.list]=state[editing.list].filter(function(i){return i.id!==editing.id;});
+ state.paid=state.paid.filter(function(i){return i!==editing.id;});
+ dlg.close();render();save();
+});
+dlg.addEventListener('close',function(){delArmed=null;document.getElementById('fdel').textContent='Delete';});
+document.getElementById('fcancel').addEventListener('click',function(){dlg.close();});
+function flash(msg){var s=document.getElementById('status');s.textContent=msg;s.classList.add('show');setTimeout(function(){s.classList.remove('show');},2000);}
+function buildDoc(dataText,lockedText){
+ var parts=['<!DOCTYPE html>\n<html lang="en-GB">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<meta name="theme-color" content="#2b5a8a">\n<title>My Money</title>\n',
+ document.getElementById('appstyle').outerHTML,'\n</head>\n<body>\n<script id="data" type="application/json">',dataText,'</scr'+'ipt>\n<script id="locked" type="application/json">',lockedText,'</scr'+'ipt>\n<main id="app"></main>\n',
+ dlg.outerHTML.replace(/ open=""/,''),'\n',lockdlg.outerHTML.replace(/ open=""/,''),'\n<div id="status"></div>\n<script id="appcode">',document.getElementById('appcode').textContent,'</scr'+'ipt>\n</body>\n</html>\n'];
+ return parts.join('');
+}
+function jsonText(o){return JSON.stringify(o).replace(/</g,'\\u003c');}
+function save(){
+ state.savedAt=Date.now();
+ clearTimeout(saveTimer);
+ saveTimer=setTimeout(function(){
+  if(LOCKED){
+   seal(KEY,state).then(function(b){try{localStorage.setItem('mm-data',JSON.stringify(b));flash('Saved on this device');}catch(e){flash('Could not save');}});
+   return;
+  }
+  try{localStorage.setItem('myMoney',JSON.stringify(state));}catch(e){}
+  if(!artifact){flash('Saved on this device');return;}
+  artifact.publish(buildDoc(jsonText(state),'')).then(function(){flash('Saved');},function(err){var c=err&&(err.code||err.message||'');if(/conflict/.test(c))flash('Updated elsewhere, reloading');else flash('Saved on this device only');});
+ },800);
+}
+// ---------- make locked copy ----------
+function openLock(){document.getElementById('lp1').value='';document.getElementById('lp2').value='';document.getElementById('lockerr').hidden=true;lockdlg.showModal();}
+document.getElementById('lockcancel').onclick=function(){lockdlg.close();};
+document.getElementById('lockfrm').addEventListener('submit',function(e){
+ e.preventDefault();
+ var p1=document.getElementById('lp1').value,p2=document.getElementById('lp2').value,er=document.getElementById('lockerr'),go=document.getElementById('lockgo');
+ function fail(m){er.textContent=m;er.hidden=false;go.disabled=false;go.textContent='Make the file';}
+ if(p1.length<4)return fail('Please use a longer password.');
+ if(p1!==p2)return fail('The two passwords are different. Try again.');
+ if(!window.crypto||!crypto.subtle)return fail('This browser can\'t lock files. Please use Chrome.');
+ go.disabled=true;go.textContent='Locking…';
+ var copy=JSON.parse(JSON.stringify(state));copy.savedAt=Date.now();
+ derive(p1).then(function(k){return seal(k,copy);}).then(function(blob){
+  var html=buildDoc('null',JSON.stringify(blob));
+  var p=downloads?downloads.save({filename:'index.html',data:html}):new Promise(function(res){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download='index.html';document.body.appendChild(a);a.click();a.remove();res();});
+  return p.then(function(){lockdlg.close();go.disabled=false;go.textContent='Make the file';flash('Locked file made');},function(err){fail(err&&err.code==='declined'?'The download was cancelled.':'Couldn\'t download the file here.');});
+ }).catch(function(){fail('Something went wrong. Try again.');});
+});
+// ---------- start ----------
+function startNormal(){
+ state=JSON.parse(document.getElementById('data').textContent);
+ try{var local=localStorage.getItem('myMoney');if(local&&!window.claude){var l=JSON.parse(local);if(l&&l.bills&&(l.savedAt||0)>=(state.savedAt||0))state=l;}}catch(e){}
+ fixMonth();render();
+ if(window.claude&&window.claude.use){
+  window.claude.use('artifact').then(function(a){artifact=a;}).catch(function(){});
+  window.claude.use('downloads').then(function(d){downloads=d;}).catch(function(){});
+ }
+}
+function unlocked(key,data){
+ KEY=key;state=data;
+ try{var s=localStorage.getItem('mm-data');if(s){unseal(key,JSON.parse(s)).then(function(l){if(l&&l.bills&&(l.savedAt||0)>(state.savedAt||0)){state=l;fixMonth();render();}}).catch(function(){});}}catch(e){}
+ fixMonth();render();
+}
+function showLock(msg){
+ app.innerHTML='<form class="lock" id="unlock"><h1>My Money</h1><p>Enter your password. This device will remember it.</p>'+(msg?'<div class="err" role="alert">'+esc(msg)+'</div>':'')+'<label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required autofocus><button class="main" id="ugo" type="submit">Open</button></form>';
+ document.getElementById('unlock').addEventListener('submit',function(e){
+  e.preventDefault();var b=document.getElementById('ugo');b.disabled=true;b.textContent='Opening…';
+  var k;derive(document.getElementById('pw').value).then(function(key){k=key;return unseal(key,lockedBlob);}).then(function(d){
+   crypto.subtle.exportKey('raw',k).then(function(raw){try{localStorage.setItem('mm-key',b64(raw));}catch(_){}});
+   unlocked(k,d);
+  }).catch(function(){showLock('That password is not right. Try again.');});
+ });
+}
+function startLocked(){
+ if(!window.crypto||!crypto.subtle){app.innerHTML='<div class="lock"><h1>My Money</h1><p>This browser can\'t open the locked app. Please open it in Chrome.</p></div>';return;}
+ var saved=null;try{saved=localStorage.getItem('mm-key');}catch(e){}
+ if(!saved)return showLock();
+ var k;crypto.subtle.importKey('raw',unb64(saved),{name:'AES-GCM'},true,['encrypt','decrypt']).then(function(key){k=key;return unseal(key,lockedBlob);}).then(function(d){unlocked(k,d);}).catch(function(){try{localStorage.removeItem('mm-key');}catch(_){}showLock();});
+}
+if(LOCKED)startLocked();else startNormal();
+})();
+</script>
+</body>
+</html>
