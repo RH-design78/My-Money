@@ -9,7 +9,7 @@
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <style id="appstyle">
-:root{--bg:#f6f4ef;--card:#fff;--ink:#1d2321;--muted:#5f6763;--line:#e3e0d8;--in:#1f7a4d;--out:#b3402f;--accent:#2b5a8a;--soft:#eef3f8;--res:#6a4c9c}
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1d2321;--muted:#5f6763;--line:#e3e0d8;--in:#1f7a4d;--out:#b3402f;--accent:#2b5a8a;--soft:#eef3f8;--res:#1f6fb2}
 html{color-scheme:light}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -154,7 +154,7 @@ function render(){
  h+='<div class="total"><span>Available to use'+(unknown?' (not counting ones not checked)':'')+'</span><span class="res">'+money(avail)+'</span></div></section>';
  h+='<div class="tools">';
  if(!LOCKED)h+='<button class="wide" id="mklock">🔒 Make a locked copy for GitHub</button>';
- if(LOCKED)h+='<button class="wide" id="logout">Lock this app on this device</button>';
+ if(LOCKED)h+='<button class="wide" id="logout">🔒 Lock this app on this device</button>';
  h+='</div>';
  app.innerHTML=h;
  var mk=document.getElementById('mklock');if(mk)mk.onclick=openLock;
